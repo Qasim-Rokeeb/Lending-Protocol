@@ -94,11 +94,6 @@ Repay borrowed ETH.
 
 Returns total USD value of supplied assets.
 
----
-
-### **getAccountBorrowValue(address user)**
-
-Returns total USD value of borrowed assets.
 
 ---
 
