@@ -1,50 +1,48 @@
 
-# 💰 Lending Protocol (ETH-Only Demo)
+# 💰 Lending Protocol – ETH-Only Demo
 
-A Solidity-based **lending and borrowing protocol** supporting ETH as collateral and loan asset, with simple interest accrual, collateral factor limits, and on-chain price feeds (mock).
+A Solidity-based **lending and borrowing smart contract** where users can supply ETH to earn interest, borrow ETH against their collateral, and have all balances automatically accrue interest over time.
+This demo version supports **ETH-only markets** with a mock on-chain price feed.
 
 ---
 
 ## 📌 Overview
 
-* **Supply ETH** to earn interest.
-* **Borrow ETH** against supplied collateral.
-* **Interest Accrual:** Simple APY for supply and borrow positions.
-* **Collateral Factor:** Limits borrow capacity to a percentage of supplied collateral (default: 75%).
-* **On-chain Price Feed (Mock):** Used for collateral and borrow value calculation.
+* **Supply ETH** → Earn interest at a fixed APY.
+* **Borrow ETH** → Use supplied ETH as collateral.
+* **Collateral Factor** → Borrow up to 75% of your collateral value.
+* **Interest Accrual** → Simple APY-based calculation for supply and borrow positions.
+* **Mock Price Feed** → On-chain prices stored in `tokenPrices`.
 
-**Deployed & Verified:**
+**Deployed & Verified Contract:**
 `0x153982057Bb2De6caAf4188bf2078f17297354Ed`
-
 
 ---
 
 ## ⚙️ Key Features
 
-* **Interest Rates:** Configurable per market (`supplyRate`, `borrowRate`).
-* **Collateral Enforcement:** Borrow limit calculated using `collateralFactor`.
-* **Price Feeds:** Maintains `tokenPrices` mapping.
-* **Events:**
+* **Configurable Interest Rates:** Set per market (`supplyRate`, `borrowRate`).
+* **Collateral Enforcement:** Prevents over-borrowing based on collateral value and `collateralFactor`.
+* **Price Feed Mapping:** Stores and updates mock USD prices for supported tokens.
+* **Event Logging:**
 
-  * `Supplied`
-  * `Borrowed`
-  * `Repaid`
-  * `Withdrawn`
+  * `Supplied` – User supplied ETH.
+  * `Borrowed` – User borrowed ETH.
+  * `Repaid` – Borrow position repaid (fully or partially).
+  * `Withdrawn` – Collateral withdrawn.
 
 ---
 
 ## 🛠 Deployment
 
-### Defaults on Deployment:
+**Default ETH Market Settings (`address(0)`):**
 
-* ETH market (`address(0)`) initialized with:
+* Price: `$2000` USD
+* Collateral Factor: **75%**
+* Supply Rate: **2% APY**
+* Borrow Rate: **5% APY**
 
-  * Price: `$2000`
-  * Collateral factor: `75%`
-  * Supply rate: `2% APY`
-  * Borrow rate: `5% APY`
-
-### Example:
+**Example Deployment:**
 
 ```solidity
 LendingProtocol lending = new LendingProtocol();
@@ -52,32 +50,32 @@ LendingProtocol lending = new LendingProtocol();
 
 ---
 
-## 📜 Functions
+## 📜 Core Functions
 
 ### **supply(address token)** (payable)
 
-Supply ETH to the protocol to earn interest.
+Supply ETH to the protocol and start earning interest.
 
-* **Requires:** `msg.value > 0`.
-* **Emits:** `Supplied`.
+* **Requires:** `msg.value > 0`
+* **Emits:** `Supplied`
 
 ---
 
 ### **withdraw(address token, uint256 amount)**
 
-Withdraw supplied ETH.
+Withdraw ETH you’ve supplied.
 
-* **Requires:** Sufficient supply balance.
-* **Emits:** `Withdrawn`.
+* **Requires:** Enough supply balance
+* **Emits:** `Withdrawn`
 
 ---
 
 ### **borrow(address token, uint256 amount)**
 
-Borrow ETH using supplied collateral.
+Borrow ETH against your supplied collateral.
 
-* **Requires:** Borrow limit not exceeded (based on `collateralFactor` and prices).
-* **Emits:** `Borrowed`.
+* **Requires:** Borrow value ≤ (collateral value × collateral factor)
+* **Emits:** `Borrowed`
 
 ---
 
@@ -85,37 +83,48 @@ Borrow ETH using supplied collateral.
 
 Repay borrowed ETH.
 
-* **Refunds:** Excess ETH sent.
-* **Emits:** `Repaid`.
+* Excess ETH sent is refunded
+* **Emits:** `Repaid`
 
 ---
 
 ### **getAccountCollateralValue(address user)**
 
-Returns total USD value of supplied assets.
-
+Returns the USD value of a user’s supplied ETH.
 
 ---
 
 ### **getAccountInfo(address user)**
 
-Returns `(supplyBalance, borrowBalance, collateralValue, borrowValue)` for a user.
+Returns:
+`(supplyBalance, borrowBalance, collateralValue, borrowValue)`
 
 ---
 
 ### **updateTokenPrice(address token, uint256 price)** (onlyOwner)
 
-Updates the price feed for a token.
+Updates the mock USD price for a supported token.
 
 ---
 
-## 🧮 Collateral Math
+## 🧮 Collateral Rule
 
-Borrow allowed if:
+Borrowing is allowed if:
 
 ```
 borrowValue * 10000 <= collateralValue * collateralFactor
 ```
+
+---
+
+## 🧪 Suggested Tests
+
+* User supplies ETH and accrues interest.
+* User borrows ETH without exceeding collateral limit.
+* Interest accrual over time for both supply and borrow balances.
+* Borrow limit enforcement.
+* Repay with excess refund.
+* Withdraw after repaying loans.
 
 ---
 
